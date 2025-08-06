@@ -13,7 +13,7 @@ const app = express();
 
 // ✅ CORS Setup (replace your old app.use(cors()) line)
 app.use(cors({
-    origin: ['https://transcendent-puffpuff-2a9890.netlify.app'],
+    origin: ['https://lustrous-kitsune-433d9b.netlify.app/'],
     methods: ['POST', 'GET'],
     credentials: true
 }));
