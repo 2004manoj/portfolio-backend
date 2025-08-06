@@ -1,14 +1,14 @@
-// Load environment variables
+// ✅ Load environment variables
 require('dotenv').config();
 
-// Import packages
+// ✅ Import packages
 const express = require('express');
 const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
-const cors = require('cors');  // for cross-origin requests
+const cors = require('cors');
 
-// Initialize app
+// ✅ Initialize app
 const app = express();
 
 // ✅ CORS Setup (allow Netlify frontend)
@@ -18,16 +18,19 @@ app.use(cors({
     credentials: true
 }));
 
-// Middleware
+// ✅ Middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// ✅ Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log('✅ Connected to MongoDB'))
-    .catch((err) => console.error('❌ MongoDB connection error:', err));
+// ✅ Connect to MongoDB (Add options for compatibility)
+mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
+.then(() => console.log('✅ Connected to MongoDB'))
+.catch((err) => console.error('❌ MongoDB connection error:', err));
 
-// Schema & Model
+// ✅ Define Schema & Model
 const messageSchema = new mongoose.Schema({
     name: String,
     email: String,
@@ -37,18 +40,18 @@ const messageSchema = new mongoose.Schema({
 
 const Message = mongoose.model('Message', messageSchema);
 
-// ✅ POST /contact route
+// ✅ POST /contact Route
 app.post('/contact', async (req, res) => {
     const { name, email, message } = req.body;
 
     try {
-        // Save to MongoDB
+        // Save message to MongoDB
         const newMessage = new Message({ name, email, message });
         await newMessage.save();
         console.log('✅ Message saved to MongoDB');
 
-        // Send Email via Gmail
-        let transporter = nodemailer.createTransport({
+        // Email setup
+        const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
                 user: process.env.EMAIL_USER,
@@ -58,7 +61,7 @@ app.post('/contact', async (req, res) => {
 
         await transporter.sendMail({
             from: process.env.EMAIL_USER,
-            to: process.env.EMAIL_USER, // or forward to another email
+            to: process.env.EMAIL_USER, // Change if forwarding
             subject: `New Message from ${name}`,
             text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`
         });
@@ -72,12 +75,12 @@ app.post('/contact', async (req, res) => {
     }
 });
 
-// Test route
+// ✅ Health check route
 app.get('/', (req, res) => {
     res.send('🚀 Server is running...');
 });
 
-// ✅ Start server (must bind to 0.0.0.0 for Render)
+// ✅ Start server (Render needs 0.0.0.0)
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server running on port ${PORT}`);
