@@ -11,9 +11,9 @@ const cors = require('cors');  // for cross-origin requests
 // Initialize app
 const app = express();
 
-// ✅ CORS Setup (replace your old app.use(cors()) line)
+// ✅ CORS Setup (allow Netlify frontend)
 app.use(cors({
-    origin: ['https://lustrous-kitsune-433d9b.netlify.app/'],
+    origin: ['https://lustrous-kitsune-433d9b.netlify.app'],
     methods: ['POST', 'GET'],
     credentials: true
 }));
@@ -22,12 +22,12 @@ app.use(cors({
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
+// ✅ Connect to MongoDB
+mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('✅ Connected to MongoDB'))
     .catch((err) => console.error('❌ MongoDB connection error:', err));
 
-// Define Message schema & model
+// Schema & Model
 const messageSchema = new mongoose.Schema({
     name: String,
     email: String,
@@ -37,7 +37,7 @@ const messageSchema = new mongoose.Schema({
 
 const Message = mongoose.model('Message', messageSchema);
 
-// POST /contact -> save in MongoDB & send email
+// ✅ POST /contact route
 app.post('/contact', async (req, res) => {
     const { name, email, message } = req.body;
 
@@ -47,7 +47,7 @@ app.post('/contact', async (req, res) => {
         await newMessage.save();
         console.log('✅ Message saved to MongoDB');
 
-        // Send Email
+        // Send Email via Gmail
         let transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
@@ -58,7 +58,7 @@ app.post('/contact', async (req, res) => {
 
         await transporter.sendMail({
             from: process.env.EMAIL_USER,
-            to: process.env.EMAIL_USER, // or change if needed
+            to: process.env.EMAIL_USER, // or forward to another email
             subject: `New Message from ${name}`,
             text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`
         });
@@ -77,8 +77,8 @@ app.get('/', (req, res) => {
     res.send('🚀 Server is running...');
 });
 
-// Start server
+// ✅ Start server (must bind to 0.0.0.0 for Render)
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 Server running at: http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Server running on port ${PORT}`);
 });
