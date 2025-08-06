@@ -13,7 +13,7 @@ const app = express();
 
 // ✅ CORS Setup (allow Netlify frontend)
 app.use(cors({
-    origin: ['https://lustrous-kitsune-433d9b.netlify.app'],
+    origin: ['https://deluxe-caramel-ec5d3c.netlify.app'],
     methods: ['POST', 'GET'],
     credentials: true
 }));
